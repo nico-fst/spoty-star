@@ -131,16 +131,59 @@ def add_tracks_to_playlist(playlist_name: str, track_uris: List[str]):
     else:
         return f"Fehler beim Hinzufügen des Tracks {track_uris} zur Playlist {playlist_name} --- {resp_added.json()}"
 
+def date_to_decade(date: str) -> str:
+    '''macht aus YYYY-MM-DD die auf Decade abgerundetes YYYY (e.g. 1974 -> 1970)'''
+    year = date.split("-")[0]
+    return str(int(year) // 10 * 10)
+
+@app.route('/split_playlist_into_decades/<playlist_name>')
+@token_required
+def split_playlist_into_decades(playlist_name: str) -> Dict[str, List[str]]:
+    headers = {"Authorization": f'Bearer {session["access_token"]}'}
+
+    tracks_href = get_playlist(playlist_name)['tracks']['href']
+    
+    resp_tracks = requests.get(tracks_href, headers=headers)
+    if not resp_tracks.ok:
+        return f"Fehler beim Abrufen der Tracks der Playlist {playlist_name} --- {resp.json()}"
+    else:
+        tracks = resp_tracks.json()['items']
+
+        tracks_with_decades = [
+            {
+                "name": track["track"]["name"],
+                "year": date_to_decade(track["track"]["album"]["release_date"]),
+                "uri": track["track"]["uri"],
+            }
+            for track in tracks
+        ]
+        
+        tracks_by_decades = {}
+        for track in tracks_with_decades:
+            if track['year'] not in tracks_by_decades:
+                tracks_by_decades[track['year']] = []
+            tracks_by_decades[track['year']].append(track)
+
+        return tracks_by_decades
+
+
+
 @app.route('/test')
 @token_required
 def test():
-    return add_tracks_to_playlist(
-        "debug",
-        [
-            "spotify:track:7lEptt4wbM0yJTvSG5EBof",
-            "spotify:track:6rqhFgbbKwnb9MLmUQDhG6",
-        ],
-    )
+    # # test adding tracks to playlist
+
+    # return add_tracks_to_playlist(
+    #     "debug",
+    #     [
+    #         "spotify:track:7lEptt4wbM0yJTvSG5EBof",
+    #         "spotify:track:6rqhFgbbKwnb9MLmUQDhG6",
+    #     ],
+    # )
+    
+    # test splitting playlist into decades
+    
+    return split_playlist_into_decades("debug")
 
 
 if __name__ == '__main__':
