@@ -4,6 +4,7 @@ import base64
 import json
 from dotenv import load_dotenv
 import os
+from functools import wraps
 
 load_dotenv()
 
@@ -16,6 +17,15 @@ REDIRECT_URL = 'http://localhost:5001/callback'
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
 SCOPE = 'user-read-playback-state user-read-currently-playing'
+
+def token_required(f):
+    @wraps(f)
+    def decorated_f(*args, **kwargs):
+        token = session['access_token']
+        if not token:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_f
 
 @app.route('/')
 def index():
@@ -51,12 +61,9 @@ def callback():
     return redirect(url_for('currently_playing'))
 
 @app.route('/currently_playing')
+@token_required
 def currently_playing():
     token = session['access_token']
-    
-    if not token:
-        return redirect(url_for('login'))
-    
     headers = {
         'Authorization': f'Bearer {token}'
     }
