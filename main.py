@@ -5,6 +5,8 @@ import json
 from dotenv import load_dotenv
 import os
 from functools import wraps
+from pprint import pprint
+from typing import List, Dict, Union, Optional, TypedDict
 
 load_dotenv()
 
@@ -16,7 +18,15 @@ CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 REDIRECT_URL = 'http://localhost:5001/callback'
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
-SCOPE = 'user-read-playback-state user-read-currently-playing'
+SCOPE = 'user-read-playback-state user-read-currently-playing playlist-modify-public playlist-modify-private'
+
+class Playlist(TypedDict):
+    description: str
+    href: str
+    id: str
+    name: str
+    tracks: Dict[str, int] # href, total
+    uri: str
 
 def token_required(f):
     @wraps(f)
@@ -63,10 +73,7 @@ def callback():
 @app.route('/currently_playing')
 @token_required
 def currently_playing():
-    token = session['access_token']
-    headers = {
-        'Authorization': f'Bearer {token}'
-    }
+    headers = {'Authorization': f'Bearer {session["access_token"]}'}
     
     # -> resp.json()['item'] liefert album, artists, duration, ...
     resp = requests.get('https://api.spotify.com/v1/me/player/currently-playing', headers=headers)
@@ -81,7 +88,59 @@ def currently_playing():
         return f'Aktuell läuft: {track_name} von {track_artist_name}, veröffentlicht im Jahr {track_year}'
     else:
         return 'Kein Song läuft gerade'
+
+@app.route('/get_playlists')
+@token_required
+def get_playlists() -> List[Playlist]:
+    headers = {'Authorization': f'Bearer {session["access_token"]}'}
+
+    resp = requests.get("https://api.spotify.com/v1/me/playlists", headers=headers)
+
+    if resp.status_code != 200:
+        return "Fehler beim Abrufen der Playlists"
     
+    resp_playlists = resp.json()['items']
+    return [playlist for playlist in resp_playlists]
+
+@app.route('/get_playlist/<playlist_name>')
+@token_required
+def get_playlist(playlist_name: str) -> Playlist:
+    playlists = get_playlists()
+    playlist_in_dict = [pl for pl in playlists if pl['name'].lower() == playlist_name.lower()]
+    
+    if len(playlist_in_dict) == 0:
+        return f"Playlist {playlist_name} beim Nutzer nicht gefunden"
+    
+    return playlist_in_dict[0]
+
+@app.route('/add_tracks_to_playlist/<playlist_name>/<track_uris>')
+@token_required
+def add_tracks_to_playlist(playlist_name: str, track_uris: List[str]):
+    headers = {'Authorization': f'Bearer {session["access_token"]}'}
+    
+    tracks_href = get_playlist(playlist_name)['tracks']['href']
+    
+    resp_added = requests.post(
+        tracks_href,
+        json=track_uris, # expected as list von API even if only one
+        headers=headers
+    )
+    
+    if resp_added.status_code == 201:
+        return f"Track {track_uris} erfolgreich zur Playlist {playlist_name} hinzugefügt"
+    else:
+        return f"Fehler beim Hinzufügen des Tracks {track_uris} zur Playlist {playlist_name} --- {resp_added.json()}"
+
+@app.route('/test')
+@token_required
+def test():
+    return add_tracks_to_playlist(
+        "debug",
+        [
+            "spotify:track:7lEptt4wbM0yJTvSG5EBof",
+            "spotify:track:6rqhFgbbKwnb9MLmUQDhG6",
+        ],
+    )
 
 
 if __name__ == '__main__':
