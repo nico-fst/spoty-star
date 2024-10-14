@@ -91,12 +91,13 @@ def currently_playing():
 @app.route('/get_playlists')
 @token_required
 def get_playlists() -> List[Playlist]:
+    '''returns all user's playlist of [] if none or error'''
     headers = {'Authorization': f'Bearer {session["access_token"]}'}
 
     resp = requests.get("https://api.spotify.com/v1/me/playlists", headers=headers)
 
     if resp.status_code != 200:
-        return "Fehler beim Abrufen der Playlists"
+        raise Exception("Fehler beim abrufen der Playlists")
     
     resp_playlists = resp.json()['items']
     return [playlist for playlist in resp_playlists]
@@ -104,18 +105,25 @@ def get_playlists() -> List[Playlist]:
 @app.route('/get_playlist/<playlist_name>')
 @token_required
 def get_playlist(playlist_name: str) -> Playlist:
-    playlists = get_playlists()
-    playlist_in_dict = [pl for pl in playlists if pl['name'].lower() == playlist_name.lower()]
+    try:
+        playlists = get_playlists()
+    except Exception as e:
+        return str(e)
     
+    playlist_in_dict = [pl for pl in playlists if pl['name'].lower() == playlist_name.lower()]
     if len(playlist_in_dict) == 0:
-        return f"Playlist {playlist_name} beim Nutzer nicht gefunden"
+        raise Exception(f"Playlist {playlist_name} nicht gefunden")
     
     return playlist_in_dict[0]
 
 def subtract_uris_existing_in_playlist(playlist_name: str, track_uris: List[str]) -> bool:
     headers = {'Authorization': f'Bearer {session["access_token"]}'}
     
-    tracks_href = get_playlist(playlist_name)['tracks']['href']
+    try:
+        tracks_href = get_playlist(playlist_name)['tracks']['href']
+    except Exception as e:
+        return str(e)
+    
     existing_track_uris = []
     offset = 0
     limit = 100
@@ -142,7 +150,10 @@ def subtract_uris_existing_in_playlist(playlist_name: str, track_uris: List[str]
 def add_tracks_to_playlist(playlist_name: str, track_uris) -> List[str]:
     headers = {'Authorization': f'Bearer {session["access_token"]}'}
 
-    tracks_href = get_playlist(playlist_name)['tracks']['href']  # -> link to tracks in playlist_name
+    try:
+        tracks_href = get_playlist(playlist_name)['tracks']['href']  # -> link to tracks in playlist_name
+    except Exception as e:
+        return str(e)
     resp_tracks = requests.get(tracks_href, headers=headers)  # -> tracks in playlist_name
 
     # only add new tracks
@@ -171,7 +182,10 @@ def date_to_decade(date: str) -> str:
 def split_playlist_into_decades(playlist_name: str) -> Dict[str, List[str]]:
     headers = {"Authorization": f'Bearer {session["access_token"]}'}
 
-    tracks_href = get_playlist(playlist_name)['tracks']['href']
+    try:
+        tracks_href = get_playlist(playlist_name)['tracks']['href']
+    except Exception as e:
+        return str(e)
     
     resp_tracks = requests.get(tracks_href, headers=headers)
     if not resp_tracks.ok:
