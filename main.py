@@ -127,7 +127,6 @@ def subtract_uris_existing_in_playlist(playlist_name: str, track_uris: List[str]
         tracks = resp_tracks.json()['items']
     
         existing_track_uris += [track['track']['uri'] for track in tracks]
-        print(f"{len(tracks)} neue Tracks gefunden, also jetzt {len(existing_track_uris)} insgesamt")
         if len(tracks) < limit:
             break
         offset += 100
@@ -156,8 +155,6 @@ def add_tracks_to_playlist(playlist_name: str, track_uris) -> List[str]:
         json=new_track_uris, # expected as list von API even if only one
         headers=headers
     )
-
-    print(resp_added.json())
 
     if resp_added.status_code == 201:
         return f"Track {track_uris} erfolgreich zur Playlist {playlist_name} hinzugefügt"
@@ -218,23 +215,23 @@ def sort_playlist_into_decades(playlist_name: str):
 
     for decade, playlist in decades.items():
         if decade in tracks_by_decade:
-            print(f"Jetzt wird in {playlist} getan: {[[track['name'], track['year']] for track in tracks_by_decade[decade]]}")
             track_uris_of_this_decade = [track['uri'] for track in tracks_by_decade[decade]]
             add_tracks_to_playlist(playlist, track_uris_of_this_decade)
+            add_tracks_to_playlist(playlist[:-3], track_uris_of_this_decade)
 
     return "sieh nach"
 
 @app.route('/test')
 @token_required
 def test():
-    # test adding tracks to playlist
-    return add_tracks_to_playlist(
-        "[Aera] 21th::20s",
-        [
-            # "spotify:track:7lEptt4wbM0yJTvSG5EBof",
-            "spotify:track:6rqhFgbbKwnb9MLmUQDhG6",  # Speak to Me, 1970, Pink Floyd
-        ],
-    )
+    # # test adding tracks to playlist
+    # return add_tracks_to_playlist(
+    #     "[Aera] 21th::20s",
+    #     [
+    #         # "spotify:track:7lEptt4wbM0yJTvSG5EBof",
+    #         "spotify:track:6rqhFgbbKwnb9MLmUQDhG6",  # Speak to Me, 1970, Pink Floyd
+    #     ],
+    # )
 
     # # test splitting playlist into decades
     # return split_playlist_into_decades("debug")
@@ -242,9 +239,9 @@ def test():
     # # test getting playlist with weird symbols
     # return get_playlist("[Aera] 21th::20s")
 
-    # # test sorting playlist into decades
-    # # return split_playlist_into_decades("debug")
-    # return sort_playlist_into_decades("debug")
+    # test sorting playlist into decades
+    # return split_playlist_into_decades("debug")
+    return sort_playlist_into_decades("debug")
 
     # return str(
     #     subtract_uris_existing_in_playlist(
