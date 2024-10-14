@@ -31,8 +31,7 @@ class Playlist(TypedDict):
 def token_required(f):
     @wraps(f)
     def decorated_f(*args, **kwargs):
-        token = session['access_token']
-        if not token:
+        if not 'access_token' in session:
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_f
@@ -113,19 +112,53 @@ def get_playlist(playlist_name: str) -> Playlist:
     
     return playlist_in_dict[0]
 
-@app.route('/add_tracks_to_playlist/<playlist_name>/<track_uris>')
-@token_required
-def add_tracks_to_playlist(playlist_name: str, track_uris: List[str]):
+def subtract_uris_existing_in_playlist(playlist_name: str, track_uris: List[str]) -> bool:
     headers = {'Authorization': f'Bearer {session["access_token"]}'}
     
     tracks_href = get_playlist(playlist_name)['tracks']['href']
+    existing_track_uris = []
+    offset = 0
+    limit = 100
+
+    while True:
+        resp_tracks = requests.get(f'{tracks_href}?offset={offset}&limit={limit}', headers=headers)
+        if not resp_tracks.ok:
+            return f"Fehler beim Abrufen der Tracks der Playlist {playlist_name} --- {resp_tracks.json()}"
+        tracks = resp_tracks.json()['items']
     
+        existing_track_uris += [track['track']['uri'] for track in tracks]
+        print(f"{len(tracks)} neue Tracks gefunden, also jetzt {len(existing_track_uris)} insgesamt")
+        if len(tracks) < limit:
+            break
+        offset += 100
+        
+    for track_uri in track_uris:
+        if track_uri in existing_track_uris:
+            track_uris.remove(track_uri)
+        
+    return track_uris
+
+@app.route('/add_tracks_to_playlist/<playlist_name>/<track_uris>')
+@token_required
+def add_tracks_to_playlist(playlist_name: str, track_uris) -> List[str]:
+    headers = {'Authorization': f'Bearer {session["access_token"]}'}
+
+    tracks_href = get_playlist(playlist_name)['tracks']['href']  # -> link to tracks in playlist_name
+    resp_tracks = requests.get(tracks_href, headers=headers)  # -> tracks in playlist_name
+
+    # only add new tracks
+    new_track_uris = subtract_uris_existing_in_playlist(playlist_name, track_uris)
+    if len(new_track_uris) == 0:
+        return f"Keine neuen Tracks zum Hinzufügen in Playlist {playlist_name} gefunden"
+
     resp_added = requests.post(
         tracks_href,
-        json=track_uris, # expected as list von API even if only one
+        json=new_track_uris, # expected as list von API even if only one
         headers=headers
     )
-    
+
+    print(resp_added.json())
+
     if resp_added.status_code == 201:
         return f"Track {track_uris} erfolgreich zur Playlist {playlist_name} hinzugefügt"
     else:
@@ -166,24 +199,58 @@ def split_playlist_into_decades(playlist_name: str) -> Dict[str, List[str]]:
 
         return tracks_by_decades
 
+@app.route('/sort_playlist_into_decades/<playlist_name>')
+@token_required
+def sort_playlist_into_decades(playlist_name: str):
+    '''sortiert die Playlist in einzelne Decaden-Playlists'''
+    headers = {"Authorization": f'Bearer {session["access_token"]}'}
 
+    tracks_by_decade = split_playlist_into_decades(playlist_name)
+    decades = {
+        "1960": "[Aera] 20th::60s",
+        "1970": "[Aera] 20th::70s",
+        "1980": "[Aera] 20th::80s",
+        "1990": "[Aera] 20th::90s",
+        "2000": "[Aera] 21th::00s",
+        "2010": "[Aera] 21th::10s",
+        "2020": "[Aera] 21th::20s",
+    }
+
+    for decade, playlist in decades.items():
+        if decade in tracks_by_decade:
+            print(f"Jetzt wird in {playlist} getan: {[[track['name'], track['year']] for track in tracks_by_decade[decade]]}")
+            track_uris_of_this_decade = [track['uri'] for track in tracks_by_decade[decade]]
+            add_tracks_to_playlist(playlist, track_uris_of_this_decade)
+
+    return "sieh nach"
 
 @app.route('/test')
 @token_required
 def test():
-    # # test adding tracks to playlist
+    # test adding tracks to playlist
+    return add_tracks_to_playlist(
+        "[Aera] 21th::20s",
+        [
+            # "spotify:track:7lEptt4wbM0yJTvSG5EBof",
+            "spotify:track:6rqhFgbbKwnb9MLmUQDhG6",  # Speak to Me, 1970, Pink Floyd
+        ],
+    )
 
-    # return add_tracks_to_playlist(
-    #     "debug",
-    #     [
-    #         "spotify:track:7lEptt4wbM0yJTvSG5EBof",
-    #         "spotify:track:6rqhFgbbKwnb9MLmUQDhG6",
-    #     ],
+    # # test splitting playlist into decades
+    # return split_playlist_into_decades("debug")
+
+    # # test getting playlist with weird symbols
+    # return get_playlist("[Aera] 21th::20s")
+
+    # # test sorting playlist into decades
+    # # return split_playlist_into_decades("debug")
+    # return sort_playlist_into_decades("debug")
+
+    # return str(
+    #     subtract_uris_existing_in_playlist(
+    #         "[Aera] 21th::20s", ["spotify:track:6rqhFgbbKwnb9MLmUQDhG6"]
+    #     )
     # )
-    
-    # test splitting playlist into decades
-    
-    return split_playlist_into_decades("debug")
 
 
 if __name__ == '__main__':
