@@ -1,5 +1,5 @@
 # spoty-star
-A Spotify Flask Server automating spotify workflows
+Status Quo: Automating tasks such as splitting up a playlist in several playlists per decade (e.g. "20th::80s").
 
 # Debugging Nightmares
 
