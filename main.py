@@ -7,6 +7,7 @@ import os
 from functools import wraps
 from pprint import pprint
 from typing import List, Dict, Union, Optional, TypedDict
+from openai_api import get_songs_from_openai, search_songs_on_spotify, get_spotify_access_token
 
 load_dotenv()
 
@@ -115,6 +116,41 @@ def get_playlist(playlist_name: str) -> Playlist:
         raise Exception(f"Playlist {playlist_name} nicht gefunden")
     
     return playlist_in_dict[0]
+
+@app.route('/suggest_songs/<mood_prompt>')
+@token_required
+def suggest_songs(mood_prompt: str):
+    songs = get_songs_from_openai(mood_prompt)
+
+    if not songs:
+        return "No songs found based on the prompt."
+
+    access_token = get_spotify_access_token()
+    song_info = search_songs_on_spotify(songs, access_token)
+
+    print(songs)
+
+    if not song_info:
+        return "No songs found on Spotify based on suggestions."
+
+    response = "<h2>Suggested Songs:</h2><ul>"
+    for song in song_info:
+        response += f"<li><a href='{song['url']}'>{song['name']} by {song['artist']}</a></li>"
+    response += "</ul>"
+
+    return response
+
+def refresh_token(refresh_token):
+    response = requests.post(
+        TOKEN_URL,
+        data={
+            'grant_type': 'refresh_token',
+            'refresh_token': refresh_token,
+            'client_id': CLIENT_ID,
+            'client_secret': CLIENT_SECRET,
+        }
+    )
+    return response.json()
 
 def subtract_uris_existing_in_playlist(playlist_name: str, track_uris: List[str]) -> bool:
     headers = {'Authorization': f'Bearer {session["access_token"]}'}
