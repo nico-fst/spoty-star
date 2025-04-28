@@ -1,4 +1,4 @@
-from flask import Flask, redirect, request, session, url_for
+from flask import Flask, redirect, request, session, url_for, jsonify
 import requests
 import base64
 import json
@@ -233,8 +233,13 @@ def sort_playlist_into_decades(playlist_name: str):
             add_tracks_to_playlist(playlist, track_uris_of_this_decade)
             add_tracks_to_playlist(playlist[:-3], track_uris_of_this_decade)
 
-    return "sieh nach"
+    print("sieh nach")
+    return jsonify({"message": f"Playlist {playlist_name} erfolgreich nach Jahrzehnten sortiert!"})
 
+# @app.route('/sort')
+# @token_required
+# def sort():
+    
 @app.route('/test')
 @token_required
 def test():
@@ -255,7 +260,7 @@ def test():
 
     # test sorting playlist into decades
     # return split_playlist_into_decades("debug")
-    return sort_playlist_into_decades("debug")
+    return sort_playlist_into_decades("[Time] 2022::08")
 
     # return str(
     #     subtract_uris_existing_in_playlist(
@@ -265,4 +270,5 @@ def test():
 
 
 if __name__ == '__main__':
+    # python3 app.py
     app.run(host="localhost", port=5001, debug=True)
