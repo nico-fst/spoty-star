@@ -40,6 +40,10 @@ def token_required(f):
 def index():
     return 'Hello, melde dich an unter <a href="/login">Login</a>'
 
+@app.route('/gibdoch')
+def gibdoch():
+    return 'Gib doch mal was ein'
+
 @app.route('/login')
 def login():
     # login optional, debug: dass jedes Mal Anmeldung abgefragt
@@ -268,7 +272,6 @@ def test():
     #     )
     # )
 
-
 if __name__ == '__main__':
-    # python3 app.py
+    # Starte die Flask-App auf localhost und Port 5001
     app.run(host="localhost", port=5001, debug=True)

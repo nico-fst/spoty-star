@@ -13,6 +13,19 @@ A Spotify Flask Server automating spotify workflows
   ],
 ```
 
+# Flask and React
+
+- **in Deployment:** `python3 main.py` (Flask)` running, uses the static files of React built by vite as specified in the `app` variable
+- **in Dev**: `npm run dev` running, all `api/` requests are proxied to the concurrently running `python3 main.py` Flask server (as specified in `vite.config.ts`):
+
+```js
+  server: {
+    proxy: {
+      '/api': 'http://localhost:5001',
+    }
+  }
+```
+
 # Debugging Nightmares
 
 - localhost bei redirect und /callback nicht gleich behandelt wie `127.0.0.1`
