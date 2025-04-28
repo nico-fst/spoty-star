@@ -1,7 +1,9 @@
 # spoty-star
 A Spotify Flask Server automating spotify workflows
 
-- Start via `python3 app.py`
+# Dev Reproduction
+
+1. React with vite using TailwindCSS set up just like at [tailwindcss.com](https://v3.tailwindcss.com/docs/guides/vite)
 
 # Debugging Nightmares
 
