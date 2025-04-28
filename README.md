@@ -4,6 +4,14 @@ A Spotify Flask Server automating spotify workflows
 # Dev Reproduction
 
 1. React with vite using TailwindCSS set up just like at [tailwindcss.com](https://v3.tailwindcss.com/docs/guides/vite)
+2. DaisyUI installed just like here: [daisyui.com](https://daisyui.com/docs/install/)
+   1. also aded to `tailwind.config.js`:
+
+```js
+  plugins: [
+    require("daisyui"),
+  ],
+```
 
 # Debugging Nightmares
 
