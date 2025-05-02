@@ -7,4 +7,7 @@ export default {
   plugins: [
     require("daisyui"),
   ],
+  daisyui: {
+    themes: ["dark", "light", "business", "dracula"],
+  },
 };

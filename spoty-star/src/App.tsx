@@ -1,34 +1,49 @@
-// import { useState } from 'react'
-import { useEffect, useState } from "react";
+import {
+  Link,
+  Route,
+  BrowserRouter as Router,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 import "./App.css";
-import axios from "axios";
+import SearchOptioned from "./components/SearchOptioned";
 
-const App = () => {
-  const [resp, setResp] = useState<string>("");
-
-  const fetchAPI = async () => {
-    try {
-      const response = await axios.get<string>("/api/gibdoch");
-      console.log(response.data);
-      setResp(response.data);
-      console.log(resp);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchAPI();
-  }, []);
+const AppContent = () => {
+  const location = useLocation();
 
   return (
     <div className="p-10">
-      {resp && <div>{resp}</div>}
-      <div>Spotiify</div>
-      <button className="btn btn-secondary" onClick={() => fetchAPI}>
-        Log In
-      </button>
+      <Routes>
+        <Route
+          path="/search"
+          element={
+            <SearchOptioned
+              options={["hallo", "noch", "eins"]}
+              buttonTitle="Sort"
+            />
+          }
+        />
+        <Route path="api/login" />
+      </Routes>
+      {location.pathname === "/" && (
+        <>
+          <a href="/api/login" className="btn btn-success">
+            Spotify Login
+          </a>
+          <Link to="/search" className="btn btn-success">
+            Search
+          </Link>
+        </>
+      )}
     </div>
+  );
+};
+
+const App = () => {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 };
 

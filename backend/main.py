@@ -17,12 +17,12 @@ app = Flask(
     static_folder=os.path.join(BASE_DIR, '../spoty-star/dist/assets'),
     template_folder=os.path.join(BASE_DIR, '../spoty-star/dist')
 )
-app.secret_key = os.getenv('SECRET_KEY')
+app.secret_key = os.getenv('SECRET_KEY') # für Flask-Session
 cors = CORS(app, origins="*") #TODO change later
 
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
-REDIRECT_URL = 'http://localhost:5001/callback'
+REDIRECT_URL = 'http://localhost:5001/api/callback'
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
 SCOPE = 'user-read-playback-state user-read-currently-playing playlist-modify-public playlist-modify-private'
@@ -46,10 +46,6 @@ def token_required(f):
 @app.route('/')
 def index():
     return send_from_directory(app.template_folder, 'index.html')
-
-@app.route('/api/gibdoch')
-def gibdoch():
-    return 'backend gab tatsächlich'
 
 @app.route('/api/login')
 def login():
