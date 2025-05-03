@@ -6,7 +6,9 @@ import {
   useLocation,
 } from "react-router-dom";
 import "./App.css";
-import SearchOptioned from "./components/SearchOptioned";
+import SearchScreen from "./screens/SearchScreen";
+import { useEffect } from "react";
+import fetchPlaylists from "./screens/SearchScreen";
 
 const AppContent = () => {
   const location = useLocation();
@@ -14,15 +16,7 @@ const AppContent = () => {
   return (
     <div className="p-10">
       <Routes>
-        <Route
-          path="/search"
-          element={
-            <SearchOptioned
-              options={["hallo", "noch", "eins"]}
-              buttonTitle="Sort"
-            />
-          }
-        />
+        <Route path="/search" element={<SearchScreen />} />
         <Route path="api/login" />
       </Routes>
       {location.pathname === "/" && (

@@ -104,7 +104,7 @@ def get_playlists() -> List[Playlist]:
     resp = requests.get("https://api.spotify.com/v1/me/playlists", headers=headers)
 
     if resp.status_code != 200:
-        raise Exception("Fehler beim abrufen der Playlists")
+        raise Exception("Fehler beim Abrufen der Playlists")
     
     resp_playlists = resp.json()['items']
     return [playlist for playlist in resp_playlists]
