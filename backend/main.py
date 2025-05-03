@@ -8,6 +8,7 @@ from functools import wraps
 from pprint import pprint
 from typing import List, Dict, Union, Optional, TypedDict
 from flask_cors import CORS
+from pprint import pprint
 
 load_dotenv()
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -98,16 +99,25 @@ def currently_playing():
 @app.route('/api/get_playlists')
 @token_required
 def get_playlists() -> List[Playlist]:
-    '''returns all user's playlist of [] if none or error'''
+    '''returns user's first 100 playlists or [] if none or error'''
     headers = {'Authorization': f'Bearer {session["access_token"]}'}
-
-    resp = requests.get("https://api.spotify.com/v1/me/playlists", headers=headers)
-
-    if resp.status_code != 200:
-        raise Exception("Fehler beim Abrufen der Playlists")
     
-    resp_playlists = resp.json()['items']
-    return [playlist for playlist in resp_playlists]
+    existing_playlists = []
+    offset = 0
+    limit = 50
+    
+    while True:
+        resp_pl = requests.get(f"https://api.spotify.com/v1/me/playlists?offset={offset}&limit={limit}", headers=headers)
+        if not resp_pl.ok:
+            return f"Fehler beim Abrufen der Playlists --- {resp_pl.json()}"
+        playlists = resp_pl.json()['items']
+        
+        existing_playlists += playlists
+        if resp_pl.json()['next'] is None:
+            break
+        offset += 50
+    
+    return existing_playlists[0:100]
 
 @app.route('/api/get_playlist/<playlist_name>')
 @token_required
