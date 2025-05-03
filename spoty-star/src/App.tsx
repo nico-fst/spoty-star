@@ -7,8 +7,6 @@ import {
 } from "react-router-dom";
 import "./App.css";
 import SearchScreen from "./screens/SearchScreen";
-import { useEffect } from "react";
-import fetchPlaylists from "./screens/SearchScreen";
 
 const AppContent = () => {
   const location = useLocation();

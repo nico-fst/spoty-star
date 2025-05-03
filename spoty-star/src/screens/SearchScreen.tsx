@@ -1,19 +1,14 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Playlist } from "../types.ts";
+import PlaylistModal from "../components/PlaylistModal.tsx";
 
 const SearchScreen = () => {
-  interface Playlist {
-    description: string;
-    href: string;
-    id: string;
-    images: { height: number, url: string, width: number }[]; // Array weil verschiedene Größen
-    name: string;
-    tracks: { href: string; total: string };
-    uri: string;
-  }
-
   const [search, setSearch] = useState<string>("");
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(
+    null
+  );
 
   const fetchPlaylists = async () => {
     try {
@@ -32,9 +27,18 @@ const SearchScreen = () => {
     setSearch(e.target.value);
   };
 
-  const filteredOptions = playlists.filter((option) =>
-    option.name.toLowerCase().includes(search.toLowerCase())
-  ).sort((a, b) => a.name.localeCompare(b.name));
+  const filteredOptions = playlists
+    .filter((option) =>
+      option.name.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  useEffect(() => {
+    const modal = document.getElementById("playlist_modal");
+    if (modal instanceof HTMLDialogElement && selectedPlaylist) {
+      modal.showModal();
+    }
+  }, [selectedPlaylist]);
 
   return (
     <>
@@ -87,12 +91,19 @@ const SearchScreen = () => {
                     {pl.tracks.total} tracks
                   </div>
                 </div>
-                <button className="btn btn-secondary">Select</button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setSelectedPlaylist(pl)}
+                >
+                  Select
+                </button>
               </li>
             </>
           );
         })}
       </ul>
+
+      {selectedPlaylist && <PlaylistModal playlist={selectedPlaylist} />}
     </>
   );
 };
