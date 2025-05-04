@@ -13,9 +13,21 @@ A Spotify Flask Server automating spotify workflows
   ],
 ```
 
-# Flask and React
+# Build & Run
 
-- **in Deployment:** `python3 main.py` (Flask)` running, uses the static files of React built by vite as specified in the `app` variable
+## Build Backend
+
+The Flask backend needs an `.env` using the following structure:
+
+```yml
+CLIENT_ID = <from_spotify_dev>
+CLIENT_SECRET = <from_spotify_dev>
+SECRET_KEY = <create_random_long_string>
+```
+
+# Run
+
+- **in Prod:** run Flask server via`python3 main.py`, uses the static files of React built by vite (`npm run build`) as specified in the `main.py::app` variable
 - **in Dev**: `npm run dev` running, all `api/` requests are proxied to the concurrently running `python3 main.py` Flask server (as specified in `vite.config.ts`):
 
 ```js

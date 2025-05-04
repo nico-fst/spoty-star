@@ -14,12 +14,6 @@ const SearchScreen = () => {
     null
   );
 
-  const getPageItems = (pls: Playlist[]) => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    const end = start + ITEMS_PER_PAGE;
-    return pls.slice(start, end);
-  };
-
   const fetchPlaylists = async () => {
     setFetchingPlaylists(true);
     try {
@@ -82,7 +76,7 @@ const SearchScreen = () => {
         />
       </label>
 
-      <button className="btn btn-primary ml-4" onClick={fetchPlaylists}>
+      <button className="btn btn-primary ml-4 w-40" onClick={fetchPlaylists}>
         {fetchingPlaylists ? (
           <span className="loading loading-ring loading-xl"></span>
         ) : (
