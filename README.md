@@ -15,12 +15,11 @@ A Spotify Flask Server automating spotify workflows
   ],
 ```
 
-## Linting using [Husky](https://typicode.github.io/husky/get-started.html)
+## Linting via pre-commit hook using [Husky](https://typicode.github.io/husky/get-started.html)
 
-1. `npm install --save-dev prettier husky lint-staged`
-2. `npx husky init` inits pre-commit hook in `.husky/`
-   1. replace content of `./husky/pre-commit` with `npx lint-staged`
-3. in `package.json` add:
+Using [this tutorial](https://scottsauber.com/2021/06/01/using-husky-git-hooks-and-lint-staged-with-nested-folders/)
+
+Instead of creating `.lintstagedrc` added the following to `package.json`:
 
 ```json
 "lint-staged": {
@@ -28,7 +27,7 @@ A Spotify Flask Server automating spotify workflows
 }
 ```
 
-Now all staged .tsx, .js, ... files will get linted (needs another `git add`).
+Now all staged .tsx, .js, ... files will get linted.
 Manually lint files with `npx lint-staged`.
 
 # Build & Run
