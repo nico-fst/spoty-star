@@ -3,6 +3,8 @@ A Spotify Flask Server automating spotify workflows
 
 # Dev Reproduction
 
+## Basic Setup
+
 1. React with vite using TailwindCSS set up just like at [tailwindcss.com](https://v3.tailwindcss.com/docs/guides/vite)
 2. DaisyUI installed just like here: [daisyui.com](https://daisyui.com/docs/install/)
    1. also aded to `tailwind.config.js`:
@@ -13,17 +15,23 @@ A Spotify Flask Server automating spotify workflows
   ],
 ```
 
-# Build & Run
+## Linting using [Husky](https://typicode.github.io/husky/get-started.html)
 
-## Build Backend
+1. `npm install --save-dev prettier husky lint-staged`
+2. `npx husky init` inits pre-commit hook in `.husky/`
+   1. replace content of `./husky/pre-commit` with `npx lint-staged`
+3. in `package.json` add:
 
-The Flask backend needs an `.env` using the following structure:
-
-```yml
-CLIENT_ID = <from_spotify_dev>
-CLIENT_SECRET = <from_spotify_dev>
-SECRET_KEY = <create_random_long_string>
+```json
+"lint-staged": {
+  "*.{js,ts,jsx,tsx}": "prettier --write"
+}
 ```
+
+Now all staged .tsx, .js, ... files will get linted (needs another `git add`).
+Manually lint files with `npx lint-staged`.
+
+# Build & Run
 
 # Run
 
@@ -36,6 +44,19 @@ SECRET_KEY = <create_random_long_string>
       '/api': 'http://localhost:5001',
     }
   }
+```
+
+## Pre-Commit
+
+## Build Backend
+
+The Flask backend needs an `.env` using the following structure:
+
+```yml
+CLIENT_ID = <from_spotify_dev>
+CLIENT_SECRET = <from_spotify_dev>
+SECRET_KEY = <create_random_long_string>
+IS_DEV = <weather_api_should_redirect_to_react>
 ```
 
 # Debugging Nightmares

@@ -1,0 +1,1 @@
+cd ./spoty-star && npx lint-staged

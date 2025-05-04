@@ -1,4 +1,4 @@
-from flask import Flask, redirect, request, session, url_for, jsonify, send_from_directory
+from flask import Flask, redirect, request, session, url_for, jsonify, send_from_directory, make_response
 import requests
 import base64
 import json
@@ -23,6 +23,7 @@ cors = CORS(app, origins="*") #TODO change later
 
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+IS_DEV = os.getenv('IS_DEV')
 REDIRECT_URL = 'http://localhost:5001/api/callback'
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
@@ -40,6 +41,8 @@ def token_required(f):
     @wraps(f)
     def decorated_f(*args, **kwargs):
         if not 'access_token' in session:
+            if request.path.startswith('/api/'):
+                return make_response(jsonify({"error": "Not logged in"}), 401)
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_f
@@ -50,9 +53,29 @@ def index():
 
 @app.route('/api/login')
 def login():
+    session['next_url'] = request.args.get('next') or '/' # remember for redirecting after callback
+    
     # login optional, debug: dass jedes Mal Anmeldung abgefragt
     auth_url = f"{AUTH_URL}?response_type=code&client_id={CLIENT_ID}&scope={SCOPE}&redirect_uri={REDIRECT_URL}&prompt=login"
     return redirect(auth_url)
+
+@app.route('/api/logout')
+def logout():
+    '''pseudo logout, deletes access_token from session'''
+    session.pop('access_token', None)
+    return redirect(url_for('index'))
+
+@app.route('/api/loggedin')
+def loggedin():
+    if 'access_token' in session:
+        return make_response(jsonify({"success": "logged in"}), 200)
+    return make_response(jsonify({"error": "not logged in"}), 401)
+
+def ensure_domain(url: str) -> str:
+    print(IS_DEV, url)
+    if IS_DEV and url:
+        return f"http://localhost:5173{url}"
+    return url
 
 @app.route('/api/callback')
 def callback():
@@ -75,7 +98,7 @@ def callback():
     token_info = token_resp.json()
     session['access_token'] = token_info['access_token']
     
-    return redirect(url_for('currently_playing'))
+    return redirect(ensure_domain(session.pop('next_url', url_for('index'))))
 
 @app.route('/api/currently_playing')
 @token_required

@@ -15,13 +15,13 @@ function PlaylistModal({ playlist }: PlaylistModalProps) {
     setSorting(true);
     try {
       const encodedPl = encodeURIComponent(playlist.name);
-      const response = await axios.get<string>(
+      await axios.get<string>(
         `/api/sort_playlist_into_decades/${encodedPl}`
       );
-      console.log(response.data);
       setBtnCol("success");
-    } catch (error) {
-      console.error("Error sorting playlist:", error);
+    } catch (e: any) {
+      // TODO login guard
+      console.error("Error sorting playlist:", e);
     } finally {
       setSorting(false);
       setSorted(true);

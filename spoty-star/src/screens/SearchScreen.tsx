@@ -6,23 +6,30 @@ import PlaylistModal from "../components/PlaylistModal.tsx";
 const ITEMS_PER_PAGE = 25;
 
 const SearchScreen = () => {
-  const [fetchingPlaylists, setFetchingPlaylists] = useState(false);
+  const [fetchingPlaylists, setFetchingPlaylists] = useState<boolean>(false);
   const [search, setSearch] = useState<string>("");
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(
-    null
+    null,
   );
 
   const fetchPlaylists = async () => {
     setFetchingPlaylists(true);
     try {
-      const response = await axios.get<Playlist[]>("/api/get_playlists");
-      setPlaylists(response.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
+      const resp = await axios.get<Playlist[]>("/api/get_playlists");
+      setPlaylists(resp.data);
+    } catch (e: any) {
+      if (e.response.status === 401) {
+        window.location.href = "/api/login?next=/search";
+      }
+      console.error("Error fetching data:", e);
     }
     setFetchingPlaylists(false);
+  };
+
+  const logout = async () => {
+    window.location.href = "/api/logout";
   };
 
   useEffect(() => {
@@ -39,7 +46,7 @@ const SearchScreen = () => {
 
   const filteredOptions = playlists
     .filter((option) =>
-      option.name.toLowerCase().includes(search.toLowerCase())
+      option.name.toLowerCase().includes(search.toLowerCase()),
     )
     .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -84,6 +91,13 @@ const SearchScreen = () => {
         )}
       </button>
 
+      <button
+        className="btn btn-outline btn-primary ml-4 w-40"
+        onClick={logout}
+      >
+        Log out
+      </button>
+
       {playlists.length > 0 && !fetchingPlaylists ? (
         <>
           <ul className="list bg-base-100 rounded-box shadow-md">
@@ -92,37 +106,42 @@ const SearchScreen = () => {
               {filteredOptions.length === 1 ? "result" : "results"}
             </li>
             {/* Playlists for current page */}
-            {filteredOptions.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map(pl => {
-              const globalIndex = filteredOptions.indexOf(pl); // Index von playlist in gesamter Liste
+            {filteredOptions
+              .slice(
+                (currentPage - 1) * ITEMS_PER_PAGE,
+                currentPage * ITEMS_PER_PAGE,
+              )
+              .map((pl) => {
+                const globalIndex = filteredOptions.indexOf(pl); // Index von playlist in gesamter Liste
 
-              return (
-                <>
-                  <li className="list-row">
-                    <div className="text-4xl font-thin opacity-10 tabular-nums w-20 text-right pr-4">
-                      {globalIndex + 1}
-                    </div>
-                    <div>
-                      <img
-                        className="size-10 rounded-box"
-                        src={pl.images[pl.images.length - 1].url}
-                      />
-                    </div>
-                    <div className="list-col-grow">
-                      <div>{pl.name}</div>
-                      <div className="text-xs uppercase font-semibold opacity-40">
-                        {pl.tracks.total} tracks
+                return (
+                  <>
+                    <li className="list-row">
+                      <div className="text-4xl font-thin opacity-10 tabular-nums w-20 text-right pr-4">
+                        {globalIndex + 1}
                       </div>
-                    </div>
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => setSelectedPlaylist(pl)}
-                    >
-                      Select
-                    </button>
-                  </li>
-                </>
-              );
-            })}
+                      <div>
+                        <img
+                          className="size-10 rounded-box"
+                          src={pl.images[pl.images.length - 1].url}
+                        />
+                      </div>
+                      <div className="list-col-grow">
+                        <div>{pl.name}</div>
+                        <div className="text-xs uppercase font-semibold opacity-40">
+                          {pl.tracks.total} tracks
+                        </div>
+                      </div>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => setSelectedPlaylist(pl)}
+                      >
+                        Select
+                      </button>
+                    </li>
+                  </>
+                );
+              })}
           </ul>
 
           {/* Pagination - only if more than ITEMS_PER_PAGE options */}
@@ -134,7 +153,7 @@ const SearchScreen = () => {
                   className="join-item btn"
                   onClick={() => {
                     setCurrentPage(i + 1);
-                    window.scrollTo({ top: 0, behavior: "smooth"})
+                    window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
                 >
                   {i + 1}
