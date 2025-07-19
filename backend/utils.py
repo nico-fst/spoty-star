@@ -19,3 +19,8 @@ def token_required(f):
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_f
+
+def date_to_decade(date: str) -> str:
+    '''macht aus YYYY-MM-DD die auf Decade abgerundetes YYYY (e.g. 1974 -> 1970)'''
+    year = date.split("-")[0]
+    return str(int(year) // 10 * 10)

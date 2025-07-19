@@ -2,7 +2,8 @@ from flask import Flask, redirect, request, session, url_for, jsonify, make_resp
 from flask import Blueprint
 import os
 import requests
-from utils import ensure_domain
+
+from ..utils import ensure_domain
 
 from dotenv import load_dotenv
 load_dotenv()

@@ -59,12 +59,12 @@ Create `venv` for `backend/` and install `requirements.txt`.
 
 - **in Prod:**
   - `IS_DEV = false` in `.env`
-  - run Flask server via`python3 main.py`
+  - run Flask server via`python -m main.py`
   - uses the static files of React built by vite (`npm run build`) as specified in the `main.py::app` variable
 - **in Dev**:
   - `IS_DEV = true` in `.env`
   - `npm run dev` running
-  - all `api/` requests are proxied to the concurrently running `python3 main.py` Flask server (as specified in `vite.config.ts`):
+  - all `api/` requests are proxied to the concurrently running `python -m main.py` Flask server (as specified in `vite.config.ts`):
 
 ```js
   server: {

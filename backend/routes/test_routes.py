@@ -1,5 +1,6 @@
 from flask import Blueprint
-from utils import token_required
+
+from ..utils import token_required
 from .playlist_routes import sort_playlist_into_decades
 
 test_bp = Blueprint('test', __name__)

@@ -2,7 +2,8 @@ from flask import Flask, send_from_directory
 import os
 from flask_cors import CORS
 from pprint import pprint
-from routes.routes import api_bp # oder in __init__.py importieren
+
+from .routes.routes import api_bp # oder in __init__.py importieren
 
 from dotenv import load_dotenv
 load_dotenv()
