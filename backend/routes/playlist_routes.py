@@ -34,8 +34,6 @@ def add_tracks_to_playlist(playlist_name: str, track_uris) -> List[str]:
 @playlist_bp.route('/api/split_playlist_into_decades/<playlist_name>')
 @token_required
 def split_playlist_into_decades(playlist_name: str) -> Dict[str, List[str]]:
-    headers = {"Authorization": f'Bearer {session["access_token"]}'}
-
     try:
         tracks_href = get_playlist(playlist_name)['tracks']['href']
     except Exception as e:
@@ -65,8 +63,6 @@ def split_playlist_into_decades(playlist_name: str) -> Dict[str, List[str]]:
 @token_required
 def sort_playlist_into_decades(playlist_name: str):
     '''sortiert die Playlist in einzelne Decaden-Playlists'''
-    headers = {"Authorization": f'Bearer {session["access_token"]}'}
-
     tracks_by_decade = split_playlist_into_decades(playlist_name)
     decades = {
         "1960": "[Aera] 20th::60s",

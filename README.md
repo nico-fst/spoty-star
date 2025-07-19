@@ -1,4 +1,4 @@
-****# Spoty Star
+# Spoty Star
 
 ![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)
 ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
@@ -79,4 +79,5 @@ Create `venv` for `backend/` and install `requirements.txt`.
 # Debugging Nightmares
 
 - localhost bei redirect und /callback nicht gleich behandelt wie `127.0.0.1`
-- it seems that tracks of a given playlist can only be fetched in chunks of 100 (since there is no skip_duplicate param when adding to playlists...)
+- Spotify API has a limit per playlist/track/... call to e.g. 50 (since there is no skip_duplicate param when adding to playlists...)
+  - Spotify removed endpoints like `GET /audio-features` returning 403 from now on

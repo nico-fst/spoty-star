@@ -1,5 +1,7 @@
-from flask import Blueprint
+from flask import Blueprint, session
 from typing import Dict, TypedDict, List
+import requests
+from concurrent.futures import ThreadPoolExecutor
 
 from ..app_types import Playlist
 from ..utils import token_required
@@ -25,26 +27,38 @@ def currently_playing():
     else:
         # TODO was kommt, wenn keiner läuft?
         return 'Kein Song läuft gerade'
+    
+def fetch_playlists(limit: int, offset: int, access_token: str):
+    resp_pl = requests.get(
+        f"https://api.spotify.com/v1/me/playlists?limit={limit}&offset={offset}",
+        headers={"Authorization": f"Bearer {access_token}"}
+    )
+    try:
+        return resp_pl.json()['items']
+    except (KeyError, ValueError) as e:
+        print(f"⚠️ Fehler bei offset {offset}: {resp_pl.status_code} → {resp_pl.text}")
+        return []
 
 @playlists_get_bp.route('/api/get_playlists')
 @token_required
 def get_playlists() -> List[Playlist]:
     '''returns user's first 100 playlists or [] if none or error'''
+
+    resp_pl = spotify_get("https://api.spotify.com/v1/me/playlists?limit=1")
+    total_playlists = resp_pl.json()['total']
+    offsets = list(range(0, total_playlists, 50))  # Spotify API allows max 50 per request
     
-    existing_playlists = []
-    offset = 0
-    limit = 50
+    access_token = session.get('access_token')
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        playlists_list_list = list(
+            executor.map(
+                lambda offset: fetch_playlists(50, offset, access_token),
+                offsets
+            )
+        )
     
-    while True:
-        resp_pl = spotify_get(f"https://api.spotify.com/v1/me/playlists?offset={offset}&limit={limit}")
-        playlists = resp_pl.json()['items']
-        
-        existing_playlists += playlists
-        if resp_pl.json()['next'] is None:
-            break
-        offset += 50
-    
-    return existing_playlists[0:100]
+    playlists = [playlist for result in playlists_list_list for playlist in result]  # weil List[List[playlists]]
+    return playlists
 
 @playlists_get_bp.route('/api/get_playlist/<playlist_name>')
 @token_required
