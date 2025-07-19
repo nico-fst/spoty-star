@@ -23,7 +23,7 @@ cors = CORS(app, origins="*") #TODO change later
 
 CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
-IS_DEV = os.getenv('IS_DEV')
+IS_DEV = os.getenv('IS_DEV').lower() == 'true'
 REDIRECT_URL = 'http://localhost:5001/api/callback'
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
@@ -98,6 +98,7 @@ def callback():
     token_info = token_resp.json()
     session['access_token'] = token_info['access_token']
     
+    print(f"Redirecting to {ensure_domain(session.get('next_url'))}")
     return redirect(ensure_domain(session.pop('next_url', url_for('index'))))
 
 @app.route('/api/currently_playing')

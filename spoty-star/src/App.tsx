@@ -6,7 +6,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import "./App.css";
-import SearchScreen from "./screens/SearchScreen";
+import { SearchScreen } from "./screens/SearchScreen";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
