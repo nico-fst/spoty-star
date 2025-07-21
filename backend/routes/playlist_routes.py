@@ -59,6 +59,12 @@ def split_playlist_into_decades(playlist_name: str) -> Dict[str, List[str]]:
 
     return tracks_by_decades
 
+def sort_playlist_in_playlists(decade: str, playlist: str, tracks_by_decade: Dict[str, List[str]]):
+    if decade in tracks_by_decade:
+        track_uris_of_this_decade = [track['uri'] for track in tracks_by_decade[decade]]
+        add_tracks_to_playlist(playlist, track_uris_of_this_decade)
+        add_tracks_to_playlist(playlist[:-3], track_uris_of_this_decade)
+
 @playlist_bp.route('/api/sort_playlist_into_decades/<playlist_name>')
 @token_required
 def sort_playlist_into_decades(playlist_name: str):
@@ -74,11 +80,8 @@ def sort_playlist_into_decades(playlist_name: str):
         "2020": "[Aera] 21th::20s",
     }
 
-    for decade, playlist in decades.items():
-        if decade in tracks_by_decade:
-            track_uris_of_this_decade = [track['uri'] for track in tracks_by_decade[decade]]
-            add_tracks_to_playlist(playlist, track_uris_of_this_decade)
-            add_tracks_to_playlist(playlist[:-3], track_uris_of_this_decade)
+    for decade, decade_playlist in decades.items():
+        sort_playlist_in_playlists(decade, decade_playlist, tracks_by_decade)
 
     print("sieh nach")
     return jsonify({"message": f"Playlist {playlist_name} erfolgreich nach Jahrzehnten sortiert!"})
