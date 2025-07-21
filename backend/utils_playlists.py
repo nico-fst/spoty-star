@@ -43,3 +43,9 @@ def subtract_uris_existing_in_playlist(playlist_name: str, track_uris: List[str]
             track_uris.remove(track_uri)
         
     return track_uris
+
+def get_user_id() -> str:
+    resp = spotify_get("https://api.spotify.com/v1/me")
+    user_data = resp.json()
+    
+    return user_data['id']

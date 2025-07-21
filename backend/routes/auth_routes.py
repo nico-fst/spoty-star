@@ -16,7 +16,7 @@ CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 REDIRECT_URL = 'http://localhost:5001/api/callback'
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
-SCOPE = 'user-library-read user-read-playback-state user-read-currently-playing playlist-modify-public playlist-modify-private'
+SCOPE = 'playlist-modify-public playlist-modify-private user-library-read user-read-playback-state user-read-currently-playing playlist-modify-public playlist-modify-private'
 
 @auth_bp.route('/api/login')
 def login():

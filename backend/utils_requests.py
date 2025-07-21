@@ -15,7 +15,7 @@ def spotify_get(url: str, *, add_auth: bool = True, **kwargs):
         if not access_token: # not in thread
             access_token = session.get('access_token')
         if not access_token: # missing in session
-            abort(401, description="No access token in session.")
+            raise ValueError("No access token found in session.")
         headers["Authorization"] = f"Bearer {access_token}"
     
     start = time.time()
@@ -24,7 +24,7 @@ def spotify_get(url: str, *, add_auth: bool = True, **kwargs):
     print(f"📥 GET {url} took {duration:.2f}s")
     
     if not resp.ok:
-        abort(resp.status_code, description=f"Spotify API Error (getting {url}): {resp.text}")
+        raise requests.HTTPError(f"Spotify API Error (posting to {url}) - code {resp.status_code}: {resp.text}")
     
     return resp
 
@@ -35,7 +35,7 @@ def spotify_post(url: str, json=None, *, add_auth: bool = True, **kwargs):
         if not access_token: # not in thread
             access_token = session.get('access_token')
         if not access_token: # missing in session
-            abort(401, description="No access token in session.")
+            raise ValueError("No access token found in session.")
         headers["Authorization"] = f"Bearer {access_token}"
     
     start = time.time()
@@ -44,6 +44,6 @@ def spotify_post(url: str, json=None, *, add_auth: bool = True, **kwargs):
     print(f"📤 POST {url} took {duration:.2f}s")
     
     if not resp.ok:
-        abort(resp.status_code, description=f"Spotify API Error (posting {url}): {resp.text}")
+        raise requests.HTTPError(f"Spotify API Error (posting to {url}) - code {resp.status_code}: {resp.text}")
         
     return resp
