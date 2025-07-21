@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from ..app_types import Playlist
 from ..utils import token_required
 from ..utils_requests import spotify_get, spotify_post
+from ..thread_context import set_access_token
 
 playlists_get_bp = Blueprint('playlists_get_bp', __name__)
 
@@ -27,17 +28,10 @@ def currently_playing():
     else:
         # TODO was kommt, wenn keiner läuft?
         return 'Kein Song läuft gerade'
-    
-def fetch_playlists(limit: int, offset: int, access_token: str):
-    resp_pl = requests.get(
-        f"https://api.spotify.com/v1/me/playlists?limit={limit}&offset={offset}",
-        headers={"Authorization": f"Bearer {access_token}"}
-    )
-    try:
-        return resp_pl.json()['items']
-    except (KeyError, ValueError) as e:
-        print(f"⚠️ Fehler bei offset {offset}: {resp_pl.status_code} → {resp_pl.text}")
-        return []
+
+def thread_get_playlists(limit: int, offset: int, access_token: str) -> List[Playlist]:
+    set_access_token(access_token)
+    return spotify_get(f"https://api.spotify.com/v1/me/playlists?limit={limit}&offset={offset}")
 
 @playlists_get_bp.route('/api/get_playlists')
 @token_required
@@ -52,7 +46,7 @@ def get_playlists() -> List[Playlist]:
     with ThreadPoolExecutor(max_workers=10) as executor:
         playlists_list_list = list(
             executor.map(
-                lambda offset: fetch_playlists(50, offset, access_token),
+                lambda offset: thread_get_playlists(50, offset, access_token).json()['items'],
                 offsets
             )
         )
@@ -66,7 +60,7 @@ def get_playlist(playlist_name: str) -> Playlist:
     try:
         playlists = get_playlists()
     except Exception as e:
-        return str(e)
+        raise Exception(f"Error fetching playlists: {str(e)}")
     
     playlist_in_dict = [pl for pl in playlists if pl['name'].lower() == playlist_name.lower()]
     if len(playlist_in_dict) == 0:

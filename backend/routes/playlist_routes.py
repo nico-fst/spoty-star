@@ -19,7 +19,7 @@ def add_tracks_to_playlist(playlist_name: str, track_uris) -> List[str]:
     try:
         tracks_href = get_playlist(playlist_name)['tracks']['href']  # -> link to tracks in playlist_name
     except Exception as e:
-        return str(e)
+        raise Exception(f"Error fetching playlist {playlist_name}: {str(e)}")
 
     # only add new tracks
     new_track_uris = subtract_uris_existing_in_playlist(playlist_name, track_uris)
@@ -37,7 +37,7 @@ def split_playlist_into_decades(playlist_name: str) -> Dict[str, List[str]]:
     try:
         tracks_href = get_playlist(playlist_name)['tracks']['href']
     except Exception as e:
-        return str(e)
+        raise Exception(f"Error fetching playlist {playlist_name}: {str(e)}")
     
     resp_tracks = spotify_get(tracks_href)
     tracks = resp_tracks.json()['items']
