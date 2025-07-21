@@ -38,3 +38,13 @@ def create_monthlist(year: str, month: str) -> Playlist:
         return jsonify({"error": str(e)}), 500
     
     return resp.json(), 201
+
+@playlist_create_bp.route('/api/does_monthlist_exist/<playlist_name>')
+@token_required
+def does_monthlist_exist(playlist_name: str) -> bool:
+    title = f"[Time] {playlist_name[0:4]}::{playlist_name[5:7]}"
+    playlists = get_playlists()
+    
+    exists: bool = any(pl['name'] == title for pl in playlists)
+    print(f"{title} does exist: {exists}")
+    return jsonify(exists)
