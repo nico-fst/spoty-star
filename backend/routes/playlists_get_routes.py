@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from ..app_types import Playlist
 from ..utils import token_required
 from ..utils_requests import spotify_get, spotify_post
-from ..thread_context import set_access_token
+from ..thread_context import set_access_token, get_access_token
 
 playlists_get_bp = Blueprint('playlists_get_bp', __name__)
 
@@ -38,11 +38,15 @@ def thread_get_playlists(limit: int, offset: int, access_token: str) -> List[Pla
 def get_playlists() -> List[Playlist]:
     '''returns user's first 100 playlists or [] if none or error'''
 
+    # calculating how many playlists there are => how many threads needed
     resp_pl = spotify_get("https://api.spotify.com/v1/me/playlists?limit=1")
     total_playlists = resp_pl.json()['total']
     offsets = list(range(0, total_playlists, 50))  # Spotify API allows max 50 per request
     
-    access_token = session.get('access_token')
+    access_token = get_access_token()  # in thread
+    if not access_token:  # not in thread
+        access_token = session.get('access_token')
+        
     with ThreadPoolExecutor(max_workers=10) as executor:
         playlists_list_list = list(
             executor.map(

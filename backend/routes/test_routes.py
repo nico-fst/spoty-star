@@ -6,6 +6,7 @@ import requests
 from ..utils import token_required
 from .playlist_routes import sort_playlist_into_decades
 from ..utils_requests import spotify_get
+from ..thread_context import get_access_token
 
 test_bp = Blueprint('test', __name__)
 
