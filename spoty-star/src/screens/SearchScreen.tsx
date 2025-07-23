@@ -17,6 +17,7 @@ export const SearchScreen = () => {
     useState<boolean>(false);
   const [playlistExistsAlready, setPlaylistExistsAlready] =
     useState<boolean>(false);
+  const [createdMonthlist, setCreatedMonthlist] = useState<boolean>(false);
 
   const {
     playlists,
@@ -46,7 +47,11 @@ export const SearchScreen = () => {
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     setValidatingMonthlistInput(true);
+    setCreatedMonthlist(false);
+
     setMonthlistName(e.target.value);
+
+    // guard: only proceed if valid monthlist name
     if (!/^[1-2]\d{3}-\d{2}$/.test(e.target.value)) {
       console.log("PlaylistName NOT valid; aborting...");
       setValidMonthlistName(false);
@@ -59,8 +64,16 @@ export const SearchScreen = () => {
   };
 
   const onCreateMonthlistBtnClick = async () => {
-    const playlist: Playlist | null = await createMonthlist(monthlistName);
-    // TODO playlist anzeigen
+    const res: { playlist: Playlist } | { error: number } =
+      await createMonthlist(monthlistName);
+    if ("playlist" in res) {
+      setCreatedMonthlist(true);
+      setMonthlistName("");
+      setValidMonthlistName(true);
+      setPlaylistExistsAlready(false);
+    } else {
+      // TODO handle 400, 401, 500 from backend
+    }
   };
 
   useEffect(() => {
@@ -124,7 +137,7 @@ export const SearchScreen = () => {
           />
         </label>
         <button
-          className="btn btn-accent ml-4 w-40"
+          className={`btn btn-soft btn-success ml-4 w-40`}
           onClick={() => onCreateMonthlistBtnClick()}
           disabled={
             validatingMonthlistInput ||
@@ -137,7 +150,11 @@ export const SearchScreen = () => {
           ) : playlistExistsAlready === true ? (
             "exists already"
           ) : validMonthlistName ? (
-            "Create Monthlist"
+            createdMonthlist ? (
+              "Created!"
+            ) : (
+              "Create Monthlist"
+            )
           ) : (
             "Invalid Monthlist"
           )}

@@ -4,6 +4,7 @@ from .playlist_routes import playlist_bp
 from .test_routes import test_bp
 from .playlists_get_routes import playlists_get_bp
 from .playlist_create_routes import playlist_create_bp
+from .favs_routes import favs_bp
 
 api_bp = Blueprint('api', __name__)
 
@@ -12,3 +13,4 @@ api_bp.register_blueprint(playlist_bp)
 api_bp.register_blueprint(test_bp)
 api_bp.register_blueprint(playlists_get_bp)
 api_bp.register_blueprint(playlist_create_bp)
+api_bp.register_blueprint(favs_bp)

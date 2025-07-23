@@ -24,7 +24,7 @@ def spotify_get(url: str, *, add_auth: bool = True, **kwargs):
     print(f"📥 GET {url} took {duration:.2f}s")
     
     if not resp.ok:
-        raise requests.HTTPError(f"Spotify API Error (posting to {url}) - code {resp.status_code}: {resp.text}")
+        raise requests.HTTPError(f"Spotify API Error (GET {url}) - code {resp.status_code}: {resp.text}")
     
     return resp
 
@@ -44,6 +44,6 @@ def spotify_post(url: str, json=None, *, add_auth: bool = True, **kwargs):
     print(f"📤 POST {url} took {duration:.2f}s")
     
     if not resp.ok:
-        raise requests.HTTPError(f"Spotify API Error (posting to {url}) - code {resp.status_code}: {resp.text}")
+        raise requests.HTTPError(f"Spotify API Error (POST {url}) - code {resp.status_code}: {resp.text}")
         
     return resp

@@ -22,7 +22,7 @@ export const usePlaylists = () => {
 
   const createMonthlist = async (
     yearmonth: string,
-  ): Promise<Playlist | null> => {
+  ): Promise<{ playlist: Playlist } | { error: number }> => {
     try {
       const year = yearmonth.slice(0, 4);
       const month = yearmonth.slice(5, 7);
@@ -32,7 +32,7 @@ export const usePlaylists = () => {
       if (resp.status === 201) {
         console.log("Monthlist created successfully");
         await fetchPlaylists();
-        return resp.data as Playlist;
+        return { playlist: resp.data as Playlist };
       }
     } catch (e: any) {
       if (e.response.status === 400) {
@@ -45,8 +45,10 @@ export const usePlaylists = () => {
       } else {
         console.error("ERROR creating monthlist: ", e);
       }
+
+      return { error: e.response.status };
     }
-    return null;
+    return { error: 500 };
   };
 
   const checkIfMonthlistExists = async (

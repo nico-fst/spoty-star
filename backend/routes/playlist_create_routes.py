@@ -21,7 +21,7 @@ def create_monthlist(year: str, month: str) -> Playlist:
     now = datetime.now()
     
     if selected_date > now:
-        raise ValueError("Selected date cannot be in the future.")
+        return jsonify({"error": "Cannot create playlist for future dates."}), 401
 
     title = f"[Time] {year}::{month.zfill(2)}"
     playlists = get_playlists()

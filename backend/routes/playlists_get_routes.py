@@ -1,4 +1,4 @@
-from flask import Blueprint, session
+from flask import Blueprint, session, jsonify
 from typing import Dict, TypedDict, List
 import requests
 from concurrent.futures import ThreadPoolExecutor
@@ -7,6 +7,7 @@ from ..app_types import Playlist
 from ..utils import token_required
 from ..utils_requests import spotify_get, spotify_post
 from ..thread_context import set_access_token, get_access_token
+from ..app_constants import MAX_THREADS
 
 playlists_get_bp = Blueprint('playlists_get_bp', __name__)
 
@@ -47,7 +48,7 @@ def get_playlists() -> List[Playlist]:
     if not access_token:  # not in thread
         access_token = session.get('access_token')
         
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=40) as executor:
         playlists_list_list = list(
             executor.map(
                 lambda offset: thread_get_playlists(50, offset, access_token).json()['items'],
