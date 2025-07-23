@@ -51,6 +51,7 @@ CLIENT_ID = <from_spotify_dev>
 CLIENT_SECRET = <from_spotify_dev>
 SECRET_KEY = <create_random_long_string>
 IS_DEV = <weather_api_should_redirect_to_react_server>
+MAX_THREADS = <optional-explicitly_set_maxi_threads_used>
 ```
 
 ## Run
@@ -76,8 +77,9 @@ Create `venv` for `backend/` and install `requirements.txt`.
 
 <hr>
 
-# Debugging Nightmares
+# Debugging and general Nightmares
 
-- localhost bei redirect und /callback nicht gleich behandelt wie `127.0.0.1`
+- redirect/ and /callback: `localhost` not equally treated as `127.0.0.1`
 - Spotify API has a limit per playlist/track/... call to e.g. 50 (since there is no skip_duplicate param when adding to playlists...)
-  - Spotify removed endpoints like `GET /audio-features` returning 403 from now on
+  - Spotify removed endpoints like `GET /audio-features` returning 403 from now on...
+- Spotify saves the "added at" timestamps in ISO 8601 => since location checks for the correct time zone would overly complicate the app, it currently neglects these shifts and uses UTD

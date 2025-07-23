@@ -4,9 +4,10 @@ from concurrent.futures import ThreadPoolExecutor
 import requests
 
 from ..utils import token_required
-from .playlist_routes import sort_playlist_into_decades
+from .playlist_sort_routes import sort_playlist_into_decades
 from ..utils_requests import spotify_get
 from ..thread_context import get_access_token
+from ..app_constants import MAX_THREADS
 
 test_bp = Blueprint('test', __name__)
 
@@ -96,7 +97,7 @@ def threads():
     offsets = list(range(0, tracks_total, limit))
     
     access_token = session.get('access_token') # wei in f nicht bekannt
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
         favs_list_list = list(
             executor.map(
                 lambda offset: fetch_favs(limit, offset, access_token), # function

@@ -1,6 +1,11 @@
 import os
 from flask import Flask, redirect, request, session, url_for, jsonify, make_response
 from functools import wraps
+from datetime import datetime
+import calendar
+from typing import List
+
+from .app_types import FavEntry, Track, List
 
 IS_DEV = os.getenv('IS_DEV', 'false').lower() == 'true'
 
@@ -24,3 +29,14 @@ def date_to_decade(date: str) -> str:
     '''macht aus YYYY-MM-DD die auf Decade abgerundetes YYYY (e.g. 1974 -> 1970)'''
     year = date.split("-")[0]
     return str(int(year) // 10 * 10)
+
+def str_to_datetime(date_str: str) -> datetime:
+    return datetime.strptime(date_str, "%Y-%m-%d")
+
+def iso8601_to_datetime(date_str: str) -> datetime:
+    return datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%SZ")
+
+def get_end_of_month(year: str, month: str) -> str:
+    month_str = month.zfill(2)
+    last_day = calendar.monthrange(int(year), int(month_str))[1]
+    return str(last_day).zfill(2)
