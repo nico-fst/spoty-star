@@ -3,14 +3,12 @@ from typing import List
 from concurrent.futures import ThreadPoolExecutor
 import os
 
-from .routes.playlists_get_routes import get_playlist
+from .routes.playlist_get_routes import get_playlist
 from .utils_requests import spotify_get
 from .thread_context import set_access_token, get_access_token
 from .app_constants import MAX_THREADS
+from .routes.playlist_get_routes import thread_spotify_get_tracks
 
-def thread_spotify_get_tracks(tracks_href: str, offset: int, limit: int, access_token: str) -> List[dict]:
-    set_access_token(access_token)
-    return spotify_get(f"{tracks_href}?offset={offset}&limit={limit}").json()['items']
 
 def subtract_uris_existing_in_playlist(playlist_name: str, track_uris: List[str]) -> bool:    
     try:
@@ -49,5 +47,5 @@ def subtract_uris_existing_in_playlist(playlist_name: str, track_uris: List[str]
 def get_user_id() -> str:
     resp = spotify_get("https://api.spotify.com/v1/me")
     user_data = resp.json()
-    
+
     return user_data['id']

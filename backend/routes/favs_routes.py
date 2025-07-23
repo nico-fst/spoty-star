@@ -1,7 +1,9 @@
 from flask import Blueprint, session, jsonify
 from concurrent.futures import ThreadPoolExecutor
 import os
+from typing import List
 
+from ..app_types import FavEntry, Playlist, Track
 from ..utils import token_required
 from ..utils_requests import spotify_get
 from ..thread_context import set_access_token
@@ -10,6 +12,9 @@ from ..app_constants import MAX_THREADS
 
 
 favs_bp = Blueprint('favs_bp', __name__)
+
+def favEntries_to_tracks(fav_entries: List[FavEntry]) -> List[Track]:
+    return [fav_entry["track"] for fav_entry in fav_entries]
 
 def thread_get_favs_chunk(limit: int, offset: int, access_token: str, datetime_start = None, datetime_end = None):
     set_access_token(access_token)
@@ -28,7 +33,9 @@ def thread_get_favs_chunk(limit: int, offset: int, access_token: str, datetime_s
     else:
         return items
 
-def get_favs(date_start: str = None, date_end: str = None):
+def get_favs(date_start: str = None, date_end: str = None) -> List[FavEntry]:
+    ''' fetches favs in [date_start, date_end], expects converted to datetime objects '''
+    
     limit = 50
     access_token = session.get('access_token') # wei in f nicht bekannt
 
@@ -51,14 +58,14 @@ def get_favs(date_start: str = None, date_end: str = None):
     favs = [song for result in favs_list_list for song in result]  # weil List[List[songs]]
     print(f"fetched and filtered to {len(favs)} favorite tracks.")
 
-    return jsonify(favs)
+    return favs
 
 @favs_bp.route('/api/get_favs/')
 @token_required
 def get_favs_route():
-    return get_favs()
+    return jsonify(get_favs())
 
-@favs_bp.route('/api/get_favs/<date_start>/<date_end>/')
+@favs_bp.route('/api/get_favs/<date_start>/<date_end>')
 @token_required
 def get_favs_range(date_start: str, date_end: str):
-    return get_favs(date_start, date_end)
+    return jsonify(get_favs(date_start, date_end))

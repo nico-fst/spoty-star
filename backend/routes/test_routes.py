@@ -4,7 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 import requests
 
 from ..utils import token_required
-from .playlist_routes import sort_playlist_into_decades
+from .playlist_sort_routes import sort_playlist_into_decades
 from ..utils_requests import spotify_get
 from ..thread_context import get_access_token
 from ..app_constants import MAX_THREADS

@@ -6,14 +6,14 @@ from typing import Dict, TypedDict, List
 from ..app_types import Playlist
 from ..utils_requests import spotify_get, spotify_post
 from ..utils import date_to_decade
-from .playlists_get_routes import get_playlist
+from .playlist_get_routes import get_playlist
 from ..utils import token_required
 from ..utils_playlists import subtract_uris_existing_in_playlist
 
-playlist_bp = Blueprint('playlist', __name__)
+playlist_sort_bp = Blueprint("playlist_sort_bp", __name__)
 
 
-@playlist_bp.route('/api/add_tracks_to_playlist/<playlist_name>/<track_uris>')
+@playlist_sort_bp.route("/api/add_tracks_to_playlist/<playlist_name>/<track_uris>")
 @token_required
 def add_tracks_to_playlist(playlist_name: str, track_uris) -> List[str]:
     try:
@@ -31,7 +31,8 @@ def add_tracks_to_playlist(playlist_name: str, track_uris) -> List[str]:
         json=new_track_uris, # expected as list von API even if only one
     )
 
-@playlist_bp.route('/api/split_playlist_into_decades/<playlist_name>')
+
+@playlist_sort_bp.route("/api/split_playlist_into_decades/<playlist_name>")
 @token_required
 def split_playlist_into_decades(playlist_name: str) -> Dict[str, List[str]]:
     try:
@@ -65,7 +66,8 @@ def sort_playlist_in_playlists(decade: str, playlist: str, tracks_by_decade: Dic
         add_tracks_to_playlist(playlist, track_uris_of_this_decade)
         add_tracks_to_playlist(playlist[:-3], track_uris_of_this_decade)
 
-@playlist_bp.route('/api/sort_playlist_into_decades/<playlist_name>')
+
+@playlist_sort_bp.route("/api/sort_playlist_into_decades/<playlist_name>")
 @token_required
 def sort_playlist_into_decades(playlist_name: str):
     '''sortiert die Playlist in einzelne Decaden-Playlists'''
