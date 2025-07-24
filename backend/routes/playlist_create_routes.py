@@ -13,23 +13,21 @@ from ..utils_playlists import get_user_id
 from .favs_routes import get_favs, favEntries_to_tracks
 from ..utils import str_to_datetime, get_end_of_month
 from .playlist_add_routes import add_tracks_to_playlist
+from ..exceptions import SpotifyAPIError, LoggedOutError, ClientError
 
 playlist_create_bp = Blueprint("playlist_create_bp", __name__)
 
 
 def create_empty_playlist(title: str) -> Playlist:
     playlists = get_playlists()
+    user_id = get_user_id()
 
     if any(pl["name"] == title for pl in playlists):
-        return jsonify({"message": f"Playlist '{title}' already exists."}), 400
+        raise ClientError(f"Playlist {title} exists already.")
 
-    user_id = get_user_id()
-    try:
-        resp = spotify_post(
-            f"https://api.spotify.com/v1/users/{user_id}/playlists", {"name": title}
-        )
-    except requests.HTTPError as e:
-        return jsonify({"error": str(e)}), 500
+    resp = spotify_post(
+        f"https://api.spotify.com/v1/users/{user_id}/playlists", {"name": title}
+    )
 
     return resp.json(), 201
 
@@ -42,17 +40,16 @@ def create_monthlist(year: str, month: str) -> Playlist:
     month = month.zfill(2)
 
     if selected_date > now:
-        return jsonify({"error": "Cannot create playlist for future dates."}), 401
+        raise ClientError(
+            f"Cannot create playlist for future dates.", "FutureDateError"
+        )
 
     title = f"[Time] {year}::{month.zfill(2)}"
 
     empty_playlist, status = create_empty_playlist(title)
-    if status != 201:
-        return empty_playlist, status
 
     filtered_favs: List[FavEntry] = get_favs(
-        f"{year}-{month}-01",
-        f"{year}-{month}-{get_end_of_month(year, month)}"
+        f"{year}-{month}-01", f"{year}-{month}-{get_end_of_month(year, month)}"
     )
     filtered_tracks: List[Track] = favEntries_to_tracks(filtered_favs)
 
