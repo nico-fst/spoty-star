@@ -47,8 +47,11 @@ export const PlaylistList = ({
 
                 return (
                   <>
-                    <li className="list-row">
-                      <div className="text-4xl font-thin opacity-10 tabular-nums w-20 text-right pr-4">
+                    <li
+                      className="list-row cursor-pointer"
+                      onClick={() => setSelectedPlaylist(pl)}
+                    >
+                      <div className="text-4xl font-thin opacity-10 tabular-nums w-24 text-right pr-4">
                         {globalIndex + 1}
                       </div>
                       <div>

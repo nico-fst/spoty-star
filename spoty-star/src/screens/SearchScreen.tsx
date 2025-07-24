@@ -161,7 +161,12 @@ export const SearchScreen = () => {
         </button>
       </div>
 
-      {selectedPlaylist && <PlaylistModal playlist={selectedPlaylist} />}
+      {selectedPlaylist && (
+        <PlaylistModal
+          playlist={selectedPlaylist}
+          onClose={() => setSelectedPlaylist(null)}
+        />
+      )}
 
       <PlaylistList
         playlists={playlists}

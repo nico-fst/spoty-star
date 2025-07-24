@@ -4,9 +4,10 @@ import axios from "axios";
 
 interface PlaylistModalProps {
   playlist: Playlist;
+  onClose: () => void;
 }
 
-function PlaylistModal({ playlist }: PlaylistModalProps) {
+function PlaylistModal({ playlist, onClose }: PlaylistModalProps) {
   const [sorting, setSorting] = useState(false);
   const [sorted, setSorted] = useState(false);
   const [btnCol, setBtnCol] = useState("primary");
@@ -15,9 +16,7 @@ function PlaylistModal({ playlist }: PlaylistModalProps) {
     setSorting(true);
     try {
       const encodedPl = encodeURIComponent(playlist.name);
-      await axios.get<string>(
-        `/api/sort_playlist_into_decades/${encodedPl}`
-      );
+      await axios.get<string>(`/api/sort_playlist_into_decades/${encodedPl}`);
       setBtnCol("success");
     } catch (e: any) {
       // TODO login guard
@@ -35,10 +34,10 @@ function PlaylistModal({ playlist }: PlaylistModalProps) {
         <div>
           <h1 className="font-bold text-lg">{playlist.name}</h1>
           <p className="opacity-50 uppercase">{playlist.tracks.total} tracks</p>
-          <p className="py-4">
-            {playlist.description === ""
-              ? "Playlist has no description :("
-              : playlist.description}
+          <p
+            className={`py-4 italic ${playlist.description === "" ? "opacity-30" : ""}`}
+          >
+            {playlist.description || "Playlist has no description"}
           </p>
           <button
             className={`btn btn-${btnCol} w-40`}
@@ -66,7 +65,7 @@ function PlaylistModal({ playlist }: PlaylistModalProps) {
         </div>
       </div>
       <form method="dialog" className="modal-backdrop">
-        <button>close</button>
+        <button onClick={onClose}>close</button>
       </form>
     </dialog>
   );
