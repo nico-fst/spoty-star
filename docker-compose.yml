@@ -1,0 +1,14 @@
+services:
+  spoty-star:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "53412:53412"
+    container_name: spoty-star
+    restart: always
+    environment:
+      CLIENT_ID: ${CLIENT_ID}
+      CLIENT_SECRET: ${CLIENT_SECRET}
+      SECRET_KEY: ${SECRET_KEY}
+      IS_DEV: ${IS_DEV}

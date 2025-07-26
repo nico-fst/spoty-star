@@ -4,6 +4,7 @@ from flask_cors import CORS
 from pprint import pprint
 from flask import jsonify
 from werkzeug.exceptions import HTTPException
+import traceback
 
 from .routes.routes import api_bp  # oder in __init__.py importieren
 
@@ -54,12 +55,13 @@ def handle_exception(e):
             e.status_code,
         )
     else:
+        traceback.print_exc()
         return (
             jsonify(
                 {
                     "error": {
                         "type": "internal_server_error",
-                        "message": "Internal Server Error",
+                        "message": str(e),
                         "code": 500,
                     }
                 }
@@ -74,5 +76,5 @@ def index():
 
 
 if __name__ == "__main__":
-    # python3 app.py
-    app.run(host="localhost", port=5001, debug=True)
+    # python -m backend.main
+    app.run(host="0.0.0.0", port=53412, debug=True)

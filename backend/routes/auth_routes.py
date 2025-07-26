@@ -4,6 +4,7 @@ import os
 import requests
 
 from ..utils import ensure_domain
+from ..exceptions import NotFoundError, SpotifyAPIError
 
 from dotenv import load_dotenv
 
@@ -14,7 +15,7 @@ auth_bp = Blueprint("auth", __name__)
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 
-REDIRECT_URL = "http://localhost:5001/api/callback"
+REDIRECT_URL = "http://127.0.0.1:53412/api/callback"
 AUTH_URL = "https://accounts.spotify.com/authorize"
 TOKEN_URL = "https://accounts.spotify.com/api/token"
 SCOPE = "playlist-modify-public playlist-modify-private user-library-read user-read-playback-state user-read-currently-playing playlist-modify-public playlist-modify-private"
@@ -51,7 +52,7 @@ def callback():
     code = request.args.get("code")
 
     if not code:
-        return "Fehler beim Login: Kein Authorizaton Code erhalten"
+        raise NotFoundError(f"No code found at /api/callback")
 
     # Exchange Authorization Code -> Access token
     token_resp = requests.post(
@@ -68,6 +69,11 @@ def callback():
     # Response with Token
     token_info = token_resp.json()
     session["access_token"] = token_info["access_token"]
+
+    if token_resp.status_code != 200:
+        raise SpotifyAPIError(f"Error at token exchange: {token_resp.text}")
+    if 'access_token' not in token_info:
+        raise NotFoundError(f"No access_token in response found: {token_info}")
 
     print(f"Redirecting to {ensure_domain(session.get('next_url'))}")
     return redirect(ensure_domain(session.pop("next_url", url_for("index"))))

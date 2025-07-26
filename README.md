@@ -44,7 +44,7 @@ Manually lint files with `npx lint-staged`.
 
 ## Build Backend
 
-The Flask backend needs an `.env` using the following structure:
+The Flask backend needs an `.env` in `/` using the following structure:
 
 ```yml
 CLIENT_ID = <from_spotify_dev>
@@ -56,12 +56,13 @@ MAX_THREADS = <optional-explicitly_set_maxi_threads_used>
 
 ## Run
 
-Create `venv` for `backend/` and install `requirements.txt`.
+Create `venv` in `/` and install `requirements.txt`.
 
 - **in Prod:**
   - `IS_DEV = false` in `.env`
   - run Flask server via`python -m main.py`
   - uses the static files of React built by vite (`npm run build`) as specified in the `main.py::app` variable
+    - redirects `/` to `index.html`: React handles redirecting and fetching from here
 - **in Dev**:
   - `IS_DEV = true` in `.env`
   - `npm run dev` running
@@ -70,7 +71,7 @@ Create `venv` for `backend/` and install `requirements.txt`.
 ```js
   server: {
     proxy: {
-      '/api': 'http://localhost:5001',
+      '/api': 'http://localhost:53412',
     }
   }
 ```
