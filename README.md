@@ -65,7 +65,7 @@ Create `venv` for `backend/` and install `requirements.txt`.
 - **in Dev**:
   - `IS_DEV = true` in `.env`
   - `npm run dev` running
-  - all `api/` requests are proxied to the concurrently running `python -m main.py` Flask server (as specified in `vite.config.ts`):
+  - all `api/` requests are proxied to the concurrently running `python -m backend.main` Flask server started from `/` (as specified in `vite.config.ts`):
 
 ```js
   server: {

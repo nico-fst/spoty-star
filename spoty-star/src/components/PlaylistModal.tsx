@@ -8,9 +8,10 @@ interface PlaylistModalProps {
 }
 
 function PlaylistModal({ playlist, onClose }: PlaylistModalProps) {
-  const [sorting, setSorting] = useState(false);
-  const [sorted, setSorted] = useState(false);
-  const [btnCol, setBtnCol] = useState("primary");
+  const [sorting, setSorting] = useState<boolean>(false);
+  const [sorted, setSorted] = useState<boolean>(false);
+  const [btnCol, setBtnCol] = useState<string>("primary");
+  const [imgLoaded, setImgLoaded] = useState<boolean>(false);
 
   const handleSortClicked = async () => {
     setSorting(true);
@@ -30,9 +31,14 @@ function PlaylistModal({ playlist, onClose }: PlaylistModalProps) {
   return (
     <dialog id="playlist_modal" className="modal">
       <div className="modal-box flex flex-col gap-4">
-        <img className="rounded-box" src={playlist.images[0].url} />
+        {!imgLoaded && <div className="skeleton aspect-square w-full"></div>}
+        <img
+          className={`rounded-box w-full ${!imgLoaded ? "hidden" : ""}`}
+          src={playlist.images[0].url}
+          onLoad={() => setImgLoaded(true)}
+        />
         <div>
-          <h1 className="font-bold text-lg">{playlist.name}</h1>
+          <h1 className="font-bold text-2xl">{playlist.name}</h1>
           <p className="opacity-50 uppercase">{playlist.tracks.total} tracks</p>
           <p
             className={`py-4 italic ${playlist.description === "" ? "opacity-30" : ""}`}
