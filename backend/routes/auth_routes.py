@@ -15,7 +15,7 @@ auth_bp = Blueprint("auth", __name__)
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 
-REDIRECT_URL = "http://127.0.0.1:53412/api/callback"
+REDIRECT_URL = os.getenv("REDIRECT", "http://127.0.0.1:53412/api/callback")
 AUTH_URL = "https://accounts.spotify.com/authorize"
 TOKEN_URL = "https://accounts.spotify.com/api/token"
 SCOPE = "playlist-modify-public playlist-modify-private user-library-read user-read-playback-state user-read-currently-playing playlist-modify-public playlist-modify-private"

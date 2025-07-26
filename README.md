@@ -47,12 +47,15 @@ Manually lint files with `npx lint-staged`.
 The Flask backend needs an `.env` in `/` using the following structure:
 
 ```yml
-CLIENT_ID = <from_spotify_dev>
-CLIENT_SECRET = <from_spotify_dev>
+CLIENT_ID = <provided from SpotifyDev>
+CLIENT_SECRET = <provided from SpotifyDev>
 SECRET_KEY = <create_random_long_string>
-IS_DEV = <weather_api_should_redirect_to_react_server>
-MAX_THREADS = <optional-explicitly_set_maxi_threads_used>
+IS_DEV = <weather Backend should redirect to built React files>
+MAX_THREADS = <optional - explicitly set max threads to use>
+REDIRECT = <optional - e.g. https://spoty-star.nicostern.de/api/callback>
 ```
+
+The `REDIRECT`-URL should be updated when deployed - running locally on `http://127.0.0.1:53412/api/callback` it is not needed.
 
 ## Run
 
@@ -80,7 +83,7 @@ Create `venv` in `/` and install `requirements.txt`.
 
 # Debugging and general Nightmares
 
-- redirect/ and /callback: `localhost` not equally treated as `127.0.0.1`
+- redirect/ and /callback: `localhost` from Spotify's perspective not equal to `127.0.0.1`
 - Spotify API has a limit per playlist/track/... call to e.g. 50 (since there is no skip_duplicate param when adding to playlists...)
   - Spotify removed endpoints like `GET /audio-features` returning 403 from now on...
 - Spotify saves the "added at" timestamps in ISO 8601 => since location checks for the correct time zone would overly complicate the app, it currently neglects these shifts and uses UTD

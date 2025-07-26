@@ -12,3 +12,4 @@ services:
       CLIENT_SECRET: ${CLIENT_SECRET}
       SECRET_KEY: ${SECRET_KEY}
       IS_DEV: ${IS_DEV}
+      REDIRECT: ${REDIRECT}
